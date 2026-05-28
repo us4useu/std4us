@@ -1,0 +1,159 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 us4us Ltd.
+// SPDX-License-Identifier: MIT
+
+#ifndef STD4US_INTERNAL_STRING_H
+#define STD4US_INTERNAL_STRING_H
+
+#include <algorithm>
+#include <concepts>
+#include <format>
+#include <optional>
+#include <ostream>
+#include <ranges>
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace std4us::internal::string {
+
+/**
+ * Concept to check if a type has a to_string() method.
+ */
+template<typename T>
+concept has_own_to_string = requires(const T &t) {
+    { t.to_string() } -> std::same_as<std::string>;
+} || requires(const T &t) {
+    { t.to_string() } -> std::same_as<const std::string>;
+};
+
+/**
+ * Concept to check if a type has a toString() method.
+ */
+template<typename T>
+concept has_own_toString = requires(const T &t) {
+    { t.toString() } -> std::same_as<std::string>;
+} || requires(const T &t) {
+    { t.toString() } -> std::same_as<const std::string>;
+};
+
+/**
+ * Concept to check if a type has a to_string() or toString() method.
+ */
+template<typename T>
+concept has_viable_to_string = has_own_to_string<T> || has_own_toString<T>;
+
+/**
+ * Concept to check if a type has a std::to_string specialization.
+ */
+template<typename T>
+concept has_std_to_string = requires(const T &t) {
+    { std::to_string(t) } -> std::same_as<std::string>;
+};
+
+/**
+ * Concept to check if a type supports ostream << operator.
+ */
+template<typename T>
+concept streamable = requires(std::ostream &os, const T &t) {
+    { os << t } -> std::same_as<std::ostream &>;
+};
+
+/**
+ * Converts the given optional value to a string.
+ * If the value has a value, it is converted to a string using std::to_string.
+ * NOTE: the name of this method purpusefully does not follow our usual
+ * conventions; instead, it mimics the std::to_string method, as it's basically
+ * a specialization of it.
+ *
+ * @tparam T type of the value stored in the optional
+ * @param value optional value to convert
+ * @return a string representing the optional value
+ */
+template<typename T> inline std::string to_string(const std::optional<T> &value) {
+    if (value.has_value()) {
+        return std::to_string(value.value());
+    } else
+        return "(no value)";
+}
+
+/**
+ * Converts the given value to a string using the ostream << operator.
+ *
+ * @tparam T type of the value to convert
+ * @param value value to convert
+ * @return a string representing the value
+ */
+template<typename T>
+    requires (streamable<T> && !has_std_to_string<T>)
+inline std::string to_string(const T &value) {
+    std::stringstream oss;
+    oss << value;
+    return oss.str();
+}
+
+/**
+ * Converts the given bool value to a string.
+ * 
+ * @param value bool value to convert
+ * @return a string representing the bool value
+ */
+inline std::string to_string(const bool &value) {
+    return value ? "1" : "0";
+}
+
+/**
+ * to_string specialization for types that don't have a std::to_string specialization, but 
+ * do have a standard std::formatter<T>.
+ * 
+ * @tparam T type of the value to convert
+ * @param value value to convert
+ * @return a string representing the value
+ */
+template<typename T>
+    requires(!has_std_to_string<T> && /* C++23+ */ std::formattable<T, char>)
+inline std::string to_string(const T &value) {
+    return std::format("{}", value);
+}
+
+/**
+ * Fallback to use T::toString() or T::to_string() for types that define these methods.
+ * 
+ * @tparam T type of the value to convert
+ * @param value value to convert
+ * @return a string representing the value
+ */
+template<typename T>
+    requires(has_viable_to_string<T>)
+inline std::string to_string(const T &value) {
+    if constexpr (has_own_to_string<T>) {
+        return value.to_string();
+    } else {
+        return value.toString();
+    }
+}
+
+/**
+ * Fallback to std::to_string for types that we don't support with the above specializations.
+ * 
+ * @tparam T type of the value to convert
+ * @param value value to convert
+ * @return a string representing the value
+ */
+template<typename T>
+    requires(has_std_to_string<T>)
+inline std::string to_string(const T &value) {
+    return std::to_string(value);
+}
+
+/**
+ * Concept to check if the type is supported by one of the specializations of std4us::to_string. 
+ * This EXCLUDES std4us::to_string specializations backed by std4us::join!
+ */
+template<typename T>
+concept supports_to_string = requires(const T &t) {
+    { to_string(t) } -> std::same_as<std::string>;
+};
+
+}// namespace std4us::internal::string
+
+#endif// STD4US_INTERNAL_STRING_H

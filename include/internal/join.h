@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 us4us Ltd.
+// SPDX-License-Identifier: MIT
+
+#ifndef STD4US_INTERNAL_JOIN_H
+#define STD4US_INTERNAL_JOIN_H
+
+#include <algorithm>
+#include <concepts>
+#include <optional>
+#include <ostream>
+#include <ranges>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "string.h"
+
+namespace std4us::internal::join {
+
+/**
+ * Joins the given vector of strings with the given separator. Somewhat of a
+ * specialization of the more general join, but the general version relies on
+ * this one.
+ *
+ * @param values vector of strings to join
+ * @param separator string to separate the values in the resulting string
+ * @return a string containing all the values from the input vector separated by
+ * the given separator
+ */
+inline std::string join(const std::vector<std::string> &values, const std::string &separator) {
+    std::string result;
+    for (size_t i = 0; i < values.size(); ++i) {
+        result += values[i];
+        if (i != values.size() - 1) {
+            result += separator;
+        }
+    }
+    return result;
+}
+
+/**
+ * Joins the given range of values with the given separator. The values are
+ * converted to strings using std::to_string.
+ *
+ * @tparam C type of the container (e.g. std::vector<some_type>,
+ * gsl::span<some_type>, std::set<some_type>, etc.)
+ * @param values range of values to join
+ * @param separator string to separate the values in the resulting string
+ * @return a string containing all the values from the input range separated by
+ * the given separator
+ */
+template<std::ranges::range C>
+    requires string::supports_to_string<std::ranges::range_value_t<C>>
+inline std::string join(C &values, const std::string &separator) {
+    std::vector<std::string> vStr(values.size());
+    std::transform(std::begin(values), std::end(values), std::begin(vStr),
+                   [](auto v) { return string::to_string(v); });
+    return join(vStr, separator);
+}
+
+/**
+ * Concept to check if a type supports std4us::join.
+ */
+template<typename T>
+concept supports_join = requires(T &t, const std::string &s) {
+    { join(t, s) } -> std::same_as<std::string>;
+};
+
+}// namespace std4us::internal::join
+
+#endif// STD4US_INTERNAL_JOIN_H

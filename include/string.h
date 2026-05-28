@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 us4us Ltd.
+// SPDX-License-Identifier: MIT
+
+#ifndef STD4US_STRING_H
+#define STD4US_STRING_H
+
+#include <algorithm>
+#include <concepts>
+#include <format>
+#include <optional>
+#include <ostream>
+#include <ranges>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "concepts.h"
+#include "internal/join.h"
+#include "internal/string.h"
+
+namespace std4us {
+
+/** 
+ * Converts the given value to a string using the std4us::to_string specializations.
+ * @tparam T type of the value to convert.
+ * @param value value to convert
+ * @return a string representing the input value
+ */
+template<typename T>
+    requires supports_to_string<T>
+inline std::string to_string(const T &value) {
+    if constexpr (supports_to_string_directly<T>) {
+        return internal::string::to_string(value);
+    } else if constexpr (supports_join<T>) {
+        return internal::join::join(value);
+    } else {
+        // Impossible case, but we need to satisfy the compiler.
+        static_assert(supports_to_string_directly<T> || supports_join<T>,
+                      "Type does not support std4us::to_string");
+    }
+}
+
+/**
+ * Joins the given range of values with the given separator, using std4us::join specializations.
+ *
+ * @tparam C type of the container (e.g. std::vector<some_type>,
+ * gsl::span<some_type>, std::set<some_type>, etc.)
+ * @param values container of values to convert
+ * @param separator string to separate the values in the resulting string. By default, it's ", "
+ * @return a string containing all the values from the input container separated by
+ * the given separator
+ */
+template<std::ranges::range C>
+    requires supports_join<C>
+inline std::string join(const C &values, const std::string &separator = ", ") {
+    return internal::join::join(values, separator);
+}
+
+/**
+ * Splits the given string by the given separator and inserts the resulting values 
+ * into the given container of strings.
+ *
+ * @tparam C type of container (e.g. std::vector<std::string>, std::set<std::string>, etc.)
+ * @param container container to insert the resulting strings into
+ * @param s string to split and convert
+ * @param separator string to separate the values in the input string
+ */
+template<std::ranges::range C>
+    requires std::same_as<std::ranges::range_value_t<C>, std::string>
+inline void split(C &container, const std::string &s, const std::string &separator) {
+    size_t start = 0;
+    size_t end = s.find(separator);
+    while (end != std::string::npos) {
+        container.insert(container.end(), s.substr(start, end - start));
+        start = end + separator.length();
+        end = s.find(separator, start);
+    }
+    container.insert(container.end(), s.substr(start, end));
+}
+
+const std::string WHITESPACE_CHARS = " \t\n\r\f\v";
+
+/**
+ * Trims the given string by removing leading and trailing whitespace characters.
+ *
+ * @param s string to trim
+ * @return a trimmed version of the input string
+ */
+inline std::string trim(const std::string &s) {
+    size_t start = s.find_first_not_of(WHITESPACE_CHARS);
+    if (start == std::string::npos) {
+        return "";// string is all whitespace
+    }
+    size_t end = s.find_last_not_of(WHITESPACE_CHARS);
+    return s.substr(start, end - start + 1);
+}
+
+}// namespace std4us
+
+#endif// STD4US_STRING_H
