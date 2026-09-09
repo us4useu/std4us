@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 us4us Ltd.
 // SPDX-License-Identifier: MIT
 
-#ifndef STD4US_INTERNAL_JOIN_H
-#define STD4US_INTERNAL_JOIN_H
+#ifndef NSON_INTERNAL_JOIN_H
+#define NSON_INTERNAL_JOIN_H
 
 #include <algorithm>
 #include <concepts>
@@ -15,7 +15,7 @@
 
 #include "string.h"
 
-namespace std4us::internal::join {
+namespace nson::internal::join {
 
 /**
  * Joins the given vector of strings with the given separator. Somewhat of a
@@ -59,13 +59,13 @@ inline std::string join(C &values, const std::string &separator) {
 }
 
 /**
- * Concept to check if a type supports std4us::join.
+ * Concept to check if a type supports nson::join.
  */
 template<typename T>
 concept supports_join = requires(T &t, const std::string &s) {
     { join(t, s) } -> std::same_as<std::string>;
 };
 
-}// namespace std4us::internal::join
+}// namespace nson::internal::join
 
-#endif// STD4US_INTERNAL_JOIN_H
+#endif// NSON_INTERNAL_JOIN_H

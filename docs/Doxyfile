@@ -1,0 +1,45 @@
+# Minimal Doxyfile for nson — produces XML consumed by Breathe.
+# Runs from docs/ so all paths are relative to that directory.
+
+PROJECT_NAME           = "nson"
+PROJECT_BRIEF          = "us4us C++ standard library extension"
+
+# Input
+INPUT                  = ../nson
+FILE_PATTERNS          = *.h
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */internal/*
+
+# Extraction
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+
+# Output
+OUTPUT_DIRECTORY       = _build/doxygen
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+XML_PROGRAMLISTING     = NO
+
+# Preprocessing
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+
+# Concepts / C++20 support
+BUILTIN_STL_SUPPORT    = YES
+
+# Diagnostics
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+
+# Aliases to embed reStructuredText in Doxygen comments (used by Breathe).
+ALIASES                = "rst=\verbatim embed:rst" \
+                         "endrst=\endverbatim"

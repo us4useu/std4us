@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - 'v*.*.x'
+  pull_request:
+    branches:
+      - master
+      - 'v*.*.x'
+
+jobs:
+  conan-create:
+    name: conan create (${{ matrix.os }}, gcc-${{ matrix.gcc }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            gcc: 13
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install gcc-${{ matrix.gcc }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-${{ matrix.gcc }} g++-${{ matrix.gcc }}
+
+      - name: Install Conan
+        run: |
+          pip install --upgrade "conan>=2.0,<3.0"
+
+      - name: Configure Conan profile
+        env:
+          CC: gcc-${{ matrix.gcc }}
+          CXX: g++-${{ matrix.gcc }}
+        run: |
+          conan profile detect --force
+          conan profile show
+
+      - name: Extract version
+        id: version
+        run: |
+          version=$(python -c "import yaml; print(next(iter(yaml.safe_load(open('recipes/nson/config.yml'))['versions'])))")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: conan create
+        env:
+          CC: gcc-${{ matrix.gcc }}
+          CXX: g++-${{ matrix.gcc }}
+        run: |
+          conan create recipes/nson/all \
+            --version=${{ steps.version.outputs.version }} \
+            -s compiler.cppstd=23 \
+            --build=missing

@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 us4us Ltd.
 // SPDX-License-Identifier: MIT
 
-#ifndef STD4US_STRING_H
-#define STD4US_STRING_H
+#ifndef NSON_STRING_H
+#define NSON_STRING_H
 
 #include <algorithm>
 #include <concepts>
@@ -18,10 +18,11 @@
 #include "internal/join.h"
 #include "internal/string.h"
 
-namespace std4us {
+namespace nson {
 
-/** 
- * Converts the given value to a string using the std4us::to_string specializations.
+/**
+ * Converts the given value to a string using the nson::to_string specializations.
+ *
  * @tparam T type of the value to convert.
  * @param value value to convert
  * @return a string representing the input value
@@ -36,12 +37,12 @@ inline std::string to_string(const T &value) {
     } else {
         // Impossible case, but we need to satisfy the compiler.
         static_assert(supports_to_string_directly<T> || supports_join<T>,
-                      "Type does not support std4us::to_string");
+                      "Type does not support nson::to_string");
     }
 }
 
 /**
- * Joins the given range of values with the given separator, using std4us::join specializations.
+ * Joins the given range of values with the given separator, using nson::join specializations.
  *
  * @tparam C type of the container (e.g. std::vector<some_type>,
  * gsl::span<some_type>, std::set<some_type>, etc.)
@@ -95,6 +96,6 @@ inline std::string trim(const std::string &s) {
     return s.substr(start, end - start + 1);
 }
 
-}// namespace std4us
+}// namespace nson
 
-#endif// STD4US_STRING_H
+#endif// NSON_STRING_H

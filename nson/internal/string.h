@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 us4us Ltd.
 // SPDX-License-Identifier: MIT
 
-#ifndef STD4US_INTERNAL_STRING_H
-#define STD4US_INTERNAL_STRING_H
+#ifndef NSON_INTERNAL_STRING_H
+#define NSON_INTERNAL_STRING_H
 
 #include <algorithm>
 #include <concepts>
@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace std4us::internal::string {
+namespace nson::internal::string {
 
 /**
  * Concept to check if a type has a to_string() method.
@@ -146,14 +146,14 @@ inline std::string to_string(const T &value) {
 }
 
 /**
- * Concept to check if the type is supported by one of the specializations of std4us::to_string. 
- * This EXCLUDES std4us::to_string specializations backed by std4us::join!
+ * Concept to check if the type is supported by one of the specializations of nson::to_string.
+ * This EXCLUDES nson::to_string specializations backed by nson::join!
  */
 template<typename T>
 concept supports_to_string = requires(const T &t) {
     { to_string(t) } -> std::same_as<std::string>;
 };
 
-}// namespace std4us::internal::string
+}// namespace nson::internal::string
 
-#endif// STD4US_INTERNAL_STRING_H
+#endif// NSON_INTERNAL_STRING_H

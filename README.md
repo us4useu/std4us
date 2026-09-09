@@ -1,6 +1,6 @@
-# About
+# About Nia Sono 
 
-`Nson` is a header-only collection of C++ classes and functions that extend the
+Nia sono (or `nson` for short) is a header-only collection of C++ classes and functions that extend the
 C++ standard library with utilities commonly needed across us4us projects. The
 package is developed and used extensively by us4us Ltd in its C++ codebase.
 
@@ -18,12 +18,12 @@ recipe name `nson`.
 Nson is distributed as a header-only library through the
 [Conan](https://conan.io/) package manager.
 
-Add `nson/0.0.1` to the `[requires]` section of your `conanfile.txt` (or the
+Add `nson/0.1.0` to the `[requires]` section of your `conanfile.txt` (or the
 `requires` attribute of your `conanfile.py`):
 
 ```
 [requires]
-nson/0.0.1
+nson/0.1.0
 ```
 
 Then include the headers from the `nson/` directory:
@@ -43,23 +43,19 @@ int main() {
 }
 ```
 
-Nson requires a C++20-capable compiler (uses `<concepts>`, `<ranges>`, and
-`<format>`).
+Nson requires a C++23-capable compiler.
 
 # Structure
 
-The public API is exposed through the following headers:
+The public API is exposed through the following components:
 
-- `concepts.h` — Concepts used to constrain templates in the rest of the
-  library (`supports_to_string`, `supports_join`, `streamable`, ...). Useful
-  when writing your own generic code that needs to interoperate with
-  `nson::to_string` / `nson::join`.
-- `string.h` — String utilities: a generic `to_string` that works on both
+- `concepts` — Concepts used to constrain templates in the rest of the
+  library.
+- `string` — String utilities, incliuding a generic `to_string` that works on both
   scalars and ranges, `join` for combining a range of values into a single
-  string with a separator, `split` for the reverse operation, and `trim` for
-  stripping leading/trailing whitespace.
+  string with a separator, etc.
 
-Headers under `include/internal/` are implementation details and are not part
+Headers under `nson/internal/` are implementation details and are not part
 of the public API.
 
 # Contributing
